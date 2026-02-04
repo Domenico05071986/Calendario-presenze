@@ -5,17 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#007bff">
-    <title>Calendario Presenze - Cloud Sync</title>
+    <meta name="theme-color" content="#0a0a0a">
+    <title>💰 Calendario Presenze</title>
     <style>
         :root { 
-            --primary: #007bff; 
-            --primary-dark: #0056b3;
-            --success: #28a745; 
-            --bg: #f4f7f6; 
-            --shadow: rgba(0,0,0,0.1);
-            --weekend-bg: #ffebee;
-            --weekend-text: #c62828;
+            --primary: #FFD700; 
+            --primary-dark: #DAA520;
+            --success: #32CD32; 
+            --bg: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #252525;
+            --shadow: rgba(255,215,0,0.2);
+            --shadow-gold: rgba(255,215,0,0.4);
+            --weekend-bg: #2d1a1a;
+            --weekend-text: #ff6b6b;
+            --gold: #FFD700;
+            --gold-light: #FFF8DC;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
         }
         
         * { 
@@ -27,19 +34,73 @@
         }
         
         body { 
-            background: var(--bg); 
-            padding-bottom: 20px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2a 100%);
             min-height: 100vh;
+            color: var(--text-primary);
+            zoom: 0.75;
+            padding-bottom: 100px;
+        }
+        
+        /* LOGO EURO SCINTILLANTE */
+        .logo-container {
+            text-align: center;
+            padding: 25px 0 20px 0;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2520 100%);
+            border-radius: 0 0 25px 25px;
+            box-shadow: 0 6px 25px var(--shadow-gold);
+            margin-bottom: 15px;
+        }
+        
+        .euro-logo {
+            font-size: 80px;
+            animation: sparkle 2.5s ease-in-out infinite;
+            display: inline-block;
+            font-weight: bold;
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { 
+                filter: 
+                    drop-shadow(0 0 15px rgba(255,215,0,0.9))
+                    drop-shadow(0 0 30px rgba(255,165,0,0.6))
+                    drop-shadow(0 0 45px rgba(255,215,0,0.4));
+                transform: scale(1) rotate(0deg);
+            }
+            50% { 
+                filter: 
+                    drop-shadow(0 0 25px rgba(255,215,0,1))
+                    drop-shadow(0 0 50px rgba(255,165,0,0.8))
+                    drop-shadow(0 0 75px rgba(255,215,0,0.6));
+                transform: scale(1.08) rotate(5deg);
+            }
+        }
+        
+        .logo-title {
+            background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 24px;
+            font-weight: 900;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 10px rgba(255,215,0,0.5);
         }
 
-        /* HEADER FISSO OTTIMIZZATO */
+        /* HEADER FISSO */
         .sticky-top {
             position: sticky;
             top: 0;
-            z-index: 1000;
-            background: white;
+            z-index: 999;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2520 100%);
             padding: 12px 10px;
-            box-shadow: 0 2px 12px var(--shadow);
+            box-shadow: 0 3px 20px var(--shadow-gold);
+            border-bottom: 2px solid var(--gold);
         }
 
         .controls { 
@@ -47,30 +108,39 @@
             justify-content: space-between; 
             align-items: center; 
             margin-bottom: 12px; 
-            gap: 8px;
+            gap: 10px;
             flex-wrap: wrap;
         }
         
         .year-selector {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         
         #yearSelect {
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 2px solid #ddd;
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 2px solid var(--gold);
             font-weight: bold;
-            font-size: 15px;
-            background: white;
+            font-size: 16px;
+            background: var(--bg-secondary);
+            color: var(--gold);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px var(--shadow);
+        }
+        
+        #yearSelect:hover {
+            background: var(--bg-card);
+            box-shadow: 0 0 25px var(--shadow-gold);
+            transform: translateY(-2px);
         }
         
         #yearSelect:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 30px var(--shadow-gold);
         }
         
         .button-group {
@@ -80,126 +150,114 @@
         }
         
         .btn { 
-            padding: 10px 16px; 
+            padding: 11px 18px; 
             border: none; 
-            border-radius: 8px; 
-            color: white; 
-            font-weight: 600; 
-            font-size: 13px; 
+            border-radius: 10px; 
+            color: #000; 
+            font-weight: 700; 
+            font-size: 14px; 
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px var(--shadow);
+            transition: all 0.3s;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.4);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 7px;
             white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.6);
         }
         
         .btn:active {
-            transform: translateY(1px);
-            box-shadow: 0 1px 2px var(--shadow);
+            transform: translateY(0px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
         }
         
-        .btn-save { background: var(--success); }
-        .btn-save:hover { background: #218838; }
-        .btn-load { background: #6c757d; }
-        .btn-load:hover { background: #5a6268; }
-        .btn-gdrive { background: #4285f4; }
-        .btn-gdrive:hover { background: #3367d6; }
+        .btn-save { 
+            background: linear-gradient(135deg, #32CD32, #228B22); 
+            color: white;
+        }
+        .btn-save:hover { 
+            background: linear-gradient(135deg, #3ee03e, #2ab82a);
+            box-shadow: 0 6px 25px rgba(50,205,50,0.5);
+        }
+        .btn-load { 
+            background: linear-gradient(135deg, #708090, #4F5A65);
+            color: white;
+        }
+        .btn-load:hover { 
+            background: linear-gradient(135deg, #8A9AA9, #5F6A75);
+            box-shadow: 0 6px 25px rgba(112,128,144,0.5);
+        }
+        .btn-gdrive { 
+            background: linear-gradient(135deg, #4285f4, #3367d6);
+            color: white;
+        }
+        .btn-gdrive:hover { 
+            background: linear-gradient(135deg, #5a9eff, #4a7fe6);
+            box-shadow: 0 6px 25px rgba(66,133,244,0.5);
+        }
         .btn-gdrive.syncing { opacity: 0.6; pointer-events: none; }
-        .btn-gdrive.connected { background: #34a853; }
+        .btn-gdrive.connected { 
+            background: linear-gradient(135deg, #34a853, #2d8e47);
+        }
+        .btn-gdrive.connected:hover {
+            background: linear-gradient(135deg, #3eb85f, #35a050);
+            box-shadow: 0 6px 25px rgba(52,168,83,0.5);
+        }
 
         /* STATUS INDICATOR */
         .sync-status {
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: 11px;
-            color: #666;
-            padding: 4px 8px;
-            background: #f0f0f0;
-            border-radius: 12px;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--gold);
+            padding: 5px 12px;
+            background: rgba(255,215,0,0.1);
+            border-radius: 15px;
+            border: 1px solid var(--gold);
         }
         
         .sync-indicator {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: #28a745;
+            background: var(--gold);
             animation: pulse 2s infinite;
+            box-shadow: 0 0 10px var(--gold);
         }
         
         .sync-indicator.syncing {
-            background: #ffc107;
-            animation: pulse 0.5s infinite;
+            background: #FFA500;
+            animation: pulse 0.6s infinite;
+            box-shadow: 0 0 15px #FFA500;
         }
         
         .sync-indicator.error {
-            background: #dc3545;
+            background: #ff6b6b;
             animation: none;
+            box-shadow: 0 0 10px #ff6b6b;
         }
         
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
         }
 
-        /* TABS MESI OTTIMIZZATI */
-        .tabs { 
-            display: flex; 
-            overflow-x: auto; 
-            gap: 6px; 
-            padding-bottom: 8px;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary) #f0f0f0;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .tabs::-webkit-scrollbar { 
-            height: 4px;
-        }
-        
-        .tabs::-webkit-scrollbar-track {
-            background: #f0f0f0;
-            border-radius: 10px;
-        }
-        
-        .tabs::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 10px;
-        }
-        
-        .tab { 
-            flex: 0 0 auto; 
-            padding: 10px 20px; 
-            background: #eee; 
-            border-radius: 20px; 
-            border: none; 
-            font-size: 14px; 
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            user-select: none;
-        }
-        
-        .tab:active {
-            transform: scale(0.95);
-        }
-        
-        .tab.active { 
-            background: var(--primary); 
-            color: white;
-            box-shadow: 0 2px 8px rgba(0,123,255,0.3);
-        }
-
-        /* TABELLA OTTIMIZZATA PER MOBILE */
+        /* TABELLA OTTIMIZZATA */
         .table-wrapper { 
             overflow-x: auto; 
-            background: white;
-            margin: 0 10px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px var(--shadow);
+            background: var(--bg-secondary);
+            margin: 0 10px 15px 10px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px var(--shadow-gold);
             -webkit-overflow-scrolling: touch;
+            border: 2px solid rgba(255,215,0,0.2);
         }
         
         table { 
@@ -208,64 +266,81 @@
         }
         
         thead th { 
-            background: #2c3e50; 
-            color: white; 
-            font-size: 12px; 
-            padding: 14px 10px;
-            font-weight: 600;
+            background: linear-gradient(135deg, #2a2520, #3a3530);
+            color: var(--gold); 
+            font-size: 13px; 
+            padding: 16px 12px;
+            font-weight: 700;
             position: sticky;
             top: 0;
             z-index: 5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--gold);
         }
 
         th, td { 
-            border: 1px solid #eee; 
-            padding: 12px 10px; 
+            border: 1px solid rgba(255,215,0,0.1); 
+            padding: 8px 10px; 
             text-align: center; 
-            min-width: 90px;
+            min-width: 120px;
         }
         
-        /* Colonna date fissa ottimizzata */
+        /* Colonna date fissa */
         td:first-child, th:first-child { 
             position: sticky; 
             left: 0; 
             z-index: 10; 
-            background: #ecf0f1; 
-            border-right: 3px solid #bdc3c7; 
-            min-width: 90px;
-            max-width: 90px;
-            font-weight: 600;
-            font-size: 13px;
+            background: linear-gradient(135deg, #2a2520, #3a3020);
+            border-right: 3px solid var(--gold); 
+            min-width: 100px;
+            max-width: 100px;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--gold);
         }
         
         thead th:first-child {
             z-index: 15;
-            background: #2c3e50;
+            background: linear-gradient(135deg, #2a2520, #3a3530);
         }
 
-        /* INPUT OTTIMIZZATI PER TOUCH */
+        /* INPUT OTTIMIZZATI - PIÙ GRANDI */
         input[type="text"] { 
             width: 100%; 
-            border: 2px solid #ddd; 
-            border-radius: 6px; 
-            padding: 12px 8px; 
+            border: 2px solid rgba(255,215,0,0.3); 
+            border-radius: 8px; 
+            padding: 14px 10px; 
             text-align: center; 
-            font-size: 16px;
-            background: white;
-            transition: all 0.2s;
+            font-size: 17px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            transition: all 0.3s;
             -webkit-appearance: none;
+            min-width: 110px;
+            max-width: 400px;
+            font-weight: 600;
         }
         
         input[type="text"]:focus { 
             outline: none;
-            border-color: var(--primary);
-            background: #f8f9fa;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+            border-color: var(--gold);
+            background: var(--bg-secondary);
+            box-shadow: 0 0 20px var(--shadow-gold);
+            transform: scale(1.05);
+        }
+        
+        /* Input si espande quando contiene molto testo */
+        input[type="text"]:not(:placeholder-shown) {
+            min-width: 150px;
         }
         
         input[type="number"] {
             -webkit-appearance: none;
             appearance: none;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 2px solid rgba(255,215,0,0.3);
         }
         
         .weekend { 
@@ -276,58 +351,75 @@
         /* RIASSUNTO OTTIMIZZATO */
         .summary { 
             margin: 20px 10px; 
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            padding: 20px; 
-            border-radius: 16px; 
-            box-shadow: 0 4px 12px var(--shadow);
+            background: linear-gradient(135deg, #2a2520 0%, #3a3020 100%);
+            padding: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 6px 25px var(--shadow-gold);
+            border: 2px solid var(--gold);
         }
         
         .summary-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #0d47a1;
-            margin-bottom: 15px;
+            font-size: 22px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
             text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
         
         .pay-row { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            margin-bottom: 12px;
-            padding: 10px;
-            background: white;
-            border-radius: 10px;
+            margin-bottom: 14px;
+            padding: 14px;
+            background: rgba(255,215,0,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255,215,0,0.2);
+            transition: all 0.3s;
+        }
+        
+        .pay-row:hover {
+            background: rgba(255,215,0,0.1);
+            border-color: var(--gold);
+            transform: translateX(5px);
         }
         
         .pay-row span { 
-            font-size: 15px; 
-            font-weight: 600;
-            color: #333; 
+            font-size: 16px; 
+            font-weight: 700;
+            color: var(--text-primary); 
         }
         
         .pay-row input { 
-            width: 140px; 
-            border: 2px solid #e0e0e0; 
-            background: white; 
+            width: 160px; 
+            border: 2px solid var(--gold); 
+            background: var(--bg-card); 
             text-align: right; 
-            font-weight: 700;
-            color: #222; 
-            padding: 10px 12px; 
-            border-radius: 8px;
-            font-size: 15px;
+            font-weight: 800;
+            color: var(--gold); 
+            padding: 12px 14px; 
+            border-radius: 10px;
+            font-size: 16px;
+            box-shadow: 0 0 15px var(--shadow);
         }
         
         .pay-row input:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 25px var(--shadow-gold);
         }
         
         #ann { 
-            color: #0d47a1; 
-            background: #bbdefb; 
-            border: 2px solid #90caf9;
-            font-size: 16px;
+            color: var(--gold);
+            background: linear-gradient(135deg, #2a2520, #3a3020);
+            border: 2px solid var(--gold);
+            font-size: 18px;
+            box-shadow: 0 0 20px var(--shadow-gold);
         }
         
         /* TOAST NOTIFICATIONS */
@@ -336,18 +428,19 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: #333;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 25px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            background: var(--bg-secondary);
+            color: var(--gold);
+            padding: 18px 30px;
+            border-radius: 30px;
+            box-shadow: 0 6px 30px rgba(0,0,0,0.5);
             z-index: 10000;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: 700;
+            font-size: 15px;
             opacity: 0;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             max-width: 90%;
             text-align: center;
+            border: 2px solid var(--gold);
         }
         
         .toast.show {
@@ -355,17 +448,29 @@
             opacity: 1;
         }
         
-        .toast.success { background: var(--success); }
-        .toast.error { background: #dc3545; }
-        .toast.info { background: #17a2b8; }
+        .toast.success { 
+            background: linear-gradient(135deg, #2d4a2d, #1f3d1f);
+            color: var(--success);
+            border-color: var(--success);
+        }
+        .toast.error { 
+            background: linear-gradient(135deg, #4a2d2d, #3d1f1f);
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+        .toast.info { 
+            background: linear-gradient(135deg, #2d3a4a, #1f2a3d);
+            color: #4a9eff;
+            border-color: #4a9eff;
+        }
 
         /* LOADING SPINNER */
         .spinner {
             display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,215,0,0.3);
+            border-top-color: var(--gold);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -374,7 +479,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* MODAL GOOGLE DRIVE */
+        /* MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -382,7 +487,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.85);
             z-index: 9999;
             align-items: center;
             justify-content: center;
@@ -393,76 +498,173 @@
         }
         
         .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            max-width: 500px;
+            background: linear-gradient(135deg, #1a1a1a, #2a2520);
+            padding: 35px;
+            border-radius: 20px;
+            max-width: 550px;
             width: 90%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            text-align: center;
+            box-shadow: 0 15px 50px rgba(255,215,0,0.3);
+            border: 2px solid var(--gold);
         }
         
         .modal-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 15px;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--gold);
+            margin-bottom: 18px;
+            text-align: center;
         }
         
         .modal-text {
             font-size: 15px;
-            color: #666;
-            margin-bottom: 25px;
-            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+            line-height: 1.8;
         }
         
         .modal-buttons {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             justify-content: center;
         }
         
         .modal-btn {
-            padding: 12px 24px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
         }
         
         .modal-btn-primary {
-            background: #4285f4;
+            background: linear-gradient(135deg, #4285f4, #3367d6);
             color: white;
         }
         
         .modal-btn-primary:hover {
-            background: #3367d6;
+            background: linear-gradient(135deg, #5a9eff, #4a7fe6);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66,133,244,0.4);
         }
         
         .modal-btn-secondary {
-            background: #f0f0f0;
-            color: #333;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 2px solid rgba(255,215,0,0.3);
         }
         
         .modal-btn-secondary:hover {
-            background: #e0e0e0;
+            background: var(--bg-secondary);
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+        
+        /* Modal inputs */
+        .modal-content input[type="text"] {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 2px solid rgba(255,215,0,0.3);
+            padding: 12px;
+            font-size: 14px;
+        }
+        
+        .modal-content input[type="text"]:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 20px var(--shadow-gold);
+        }
+        
+        .modal-content label {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* TABS MESI IN BASSO */
+        .tabs-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: linear-gradient(180deg, #1a1a1a 0%, #2a2520 100%);
+            padding: 12px 10px;
+            box-shadow: 0 -3px 20px var(--shadow-gold);
+            border-top: 2px solid var(--gold);
+        }
+        
+        .tabs { 
+            display: flex; 
+            overflow-x: auto; 
+            gap: 8px; 
+            padding-bottom: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold) rgba(255,215,0,0.2);
+            -webkit-overflow-scrolling: touch;
+            justify-content: center;
+        }
+        
+        .tabs::-webkit-scrollbar { 
+            height: 6px;
+        }
+        
+        .tabs::-webkit-scrollbar-track {
+            background: rgba(255,215,0,0.1);
+            border-radius: 10px;
+        }
+        
+        .tabs::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 10px;
+        }
+        
+        .tab { 
+            flex: 0 0 auto; 
+            padding: 12px 24px; 
+            background: rgba(255,215,0,0.1); 
+            border-radius: 25px; 
+            border: 2px solid rgba(255,215,0,0.3); 
+            font-size: 15px; 
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .tab:hover {
+            background: rgba(255,215,0,0.2);
+            border-color: var(--gold);
+            transform: translateY(-3px);
+        }
+        
+        .tab:active {
+            transform: scale(0.95) translateY(0);
+        }
+        
+        .tab.active { 
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+            color: #000;
+            box-shadow: 0 4px 20px var(--shadow-gold);
+            border-color: var(--gold);
+            transform: scale(1.08);
         }
 
         /* RESPONSIVE DESKTOP */
         @media (min-width: 768px) {
             .sticky-top {
-                padding: 15px 20px;
+                padding: 16px 25px;
             }
             
             .table-wrapper {
-                margin: 0 20px;
+                margin: 0 25px 20px 25px;
             }
             
             .summary {
-                margin: 20px 20px;
-                max-width: 600px;
+                margin: 25px 25px;
+                max-width: 700px;
                 margin-left: auto;
                 margin-right: auto;
             }
@@ -472,27 +674,39 @@
             }
             
             th, td {
-                min-width: 100px;
+                min-width: 130px;
             }
             
             .btn {
-                padding: 12px 20px;
-                font-size: 14px;
+                padding: 13px 22px;
+                font-size: 15px;
+            }
+            
+            .logo-container {
+                padding: 30px 0 25px 0;
+            }
+            
+            .euro-logo {
+                font-size: 100px;
+            }
+            
+            .logo-title {
+                font-size: 28px;
             }
         }
         
         @media (min-width: 1024px) {
             body {
-                max-width: 1400px;
+                max-width: 1600px;
                 margin: 0 auto;
             }
             
             .table-wrapper {
-                border-radius: 16px;
+                border-radius: 20px;
             }
         }
 
-        /* MIGLIORIE ACCESSIBILITÀ */
+        /* ACCESSIBILITÀ */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -503,6 +717,12 @@
     </style>
 </head>
 <body>
+
+<!-- LOGO EURO -->
+<div class="logo-container">
+    <div class="euro-logo">💰</div>
+    <div class="logo-title">Calendario Presenze</div>
+</div>
 
 <div class="sticky-top">
     <div class="controls">
@@ -527,10 +747,14 @@
             <input type="file" id="fileIn" style="display:none" accept=".json" onchange="importData(event)">
         </div>
     </div>
-    <div class="tabs" id="tabBar"></div>
 </div>
 
 <div id="content"></div>
+
+<!-- TABS MESI IN BASSO -->
+<div class="tabs-bottom">
+    <div class="tabs" id="tabBar"></div>
+</div>
 
 <!-- Modal Setup Google Drive -->
 <div class="modal" id="setupModal">
@@ -539,7 +763,7 @@
         <div class="modal-text">
             Per abilitare la sincronizzazione automatica con Google Drive, devi creare le credenziali API Google.<br><br>
             <strong>Segui questi passaggi:</strong><br>
-            1. Vai su <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a><br>
+            1. Vai su <a href="https://console.cloud.google.com/" target="_blank" style="color: var(--gold)">Google Cloud Console</a><br>
             2. Crea un nuovo progetto<br>
             3. Abilita "Google Drive API"<br>
             4. Crea credenziali OAuth 2.0<br>
@@ -547,10 +771,10 @@
         </div>
         <div style="text-align: left; margin: 20px 0;">
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Client ID:</label>
-            <input type="text" id="clientIdInput" placeholder="xxx.apps.googleusercontent.com" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; margin-bottom: 15px;">
+            <input type="text" id="clientIdInput" placeholder="xxx.apps.googleusercontent.com" style="width: 100%; padding: 10px; border: 2px solid rgba(255,215,0,0.3); border-radius: 6px; margin-bottom: 15px;">
             
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">API Key:</label>
-            <input type="text" id="apiKeyInput" placeholder="AIzaSy..." style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;">
+            <input type="text" id="apiKeyInput" placeholder="AIzaSy..." style="width: 100%; padding: 10px; border: 2px solid rgba(255,215,0,0.3); border-radius: 6px;">
         </div>
         <div class="modal-buttons">
             <button class="modal-btn modal-btn-primary" onclick="saveGoogleCredentials()">Salva e Connetti</button>
@@ -614,7 +838,6 @@
     let tokenClient;
     let accessToken = null;
 
-    // Credenziali Google (da configurare dall'utente)
     let CLIENT_ID = localStorage.getItem('gdrive_client_id') || '';
     let API_KEY = localStorage.getItem('gdrive_api_key') || '';
     const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
@@ -624,13 +847,11 @@
     // GOOGLE DRIVE: INIZIALIZZAZIONE
     // ============================================
     function loadGoogleAPIs() {
-        // Carica Google API
         const gapiScript = document.createElement('script');
         gapiScript.src = 'https://apis.google.com/js/api.js';
         gapiScript.onload = gapiLoaded;
         document.head.appendChild(gapiScript);
 
-        // Carica Google Identity Services
         const gisScript = document.createElement('script');
         gisScript.src = 'https://accounts.google.com/gsi/client';
         gisScript.onload = gisLoaded;
@@ -660,7 +881,7 @@
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: CLIENT_ID,
             scope: SCOPES,
-            callback: '', // definito dopo
+            callback: '',
         });
         gisInited = true;
         maybeEnableGDrive();
@@ -669,8 +890,6 @@
     function maybeEnableGDrive() {
         if (gapiInited && gisInited && CLIENT_ID && API_KEY) {
             updateGDriveButton(true, false);
-            
-            // Prova a ripristinare il token salvato
             restoreSavedToken();
         }
     }
@@ -683,27 +902,22 @@
             const now = new Date().getTime();
             const expiry = parseInt(expiryTime);
             
-            // Se il token è ancora valido (con 5 minuti di margine)
             if (now < (expiry - 300000)) {
                 accessToken = savedToken;
                 isGDriveEnabled = true;
                 
-                // IMPORTANTE: Imposta il token nell'API Google
                 gapi.client.setToken({access_token: accessToken});
                 
                 updateGDriveButton(true, true);
                 updateSyncStatus('Connesso', 'success');
                 
-                // Trova il file su Drive
                 findOrCreateDriveFile().then(() => {
-                    // Dopo aver trovato il file, scarica i dati
                     return downloadFromDrive();
                 }).then(() => {
                     console.log('✅ Token ripristinato e dati sincronizzati');
                     updateSyncStatus('Sincronizzato', 'success');
                 }).catch((error) => {
                     console.error('❌ Errore ripristino:', error);
-                    // Token probabilmente non più valido, rimuovilo
                     localStorage.removeItem('gdrive_access_token');
                     localStorage.removeItem('gdrive_token_expiry');
                     accessToken = null;
@@ -713,10 +927,9 @@
                     showToast('⚠️ Richiesta nuova autenticazione', 'info');
                 });
             } else {
-                // Token scaduto, rimuovilo
                 localStorage.removeItem('gdrive_access_token');
                 localStorage.removeItem('gdrive_token_expiry');
-                console.log('⚠️ Token scaduto, richiesta nuova autorizzazione');
+                console.log('⚠️ Token scaduto');
             }
         }
     }
@@ -731,7 +944,6 @@
         }
 
         if (accessToken) {
-            // Già connesso, disconnetti
             google.accounts.oauth2.revoke(accessToken, () => {
                 accessToken = null;
                 isGDriveEnabled = false;
@@ -742,7 +954,6 @@
                 showToast('🔓 Disconnesso da Google Drive', 'info');
             });
         } else {
-            // Richiedi autenticazione
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) {
                     showToast('❌ Errore autenticazione', 'error');
@@ -751,7 +962,6 @@
                 accessToken = resp.access_token;
                 isGDriveEnabled = true;
                 
-                // Salva il token e la scadenza
                 localStorage.setItem('gdrive_access_token', accessToken);
                 const expiryTime = new Date().getTime() + (resp.expires_in * 1000);
                 localStorage.setItem('gdrive_token_expiry', expiryTime.toString());
@@ -759,10 +969,7 @@
                 updateGDriveButton(true, true);
                 showToast('✅ Connesso a Google Drive', 'success');
                 
-                // Trova o crea il file su Drive
                 await findOrCreateDriveFile();
-                
-                // Scarica dati da Drive
                 await downloadFromDrive();
             };
 
@@ -779,7 +986,6 @@
     // ============================================
     async function findOrCreateDriveFile() {
         try {
-            // Cerca il file esistente
             const response = await gapi.client.drive.files.list({
                 q: `name='${GDRIVE_FILE_NAME}' and trashed=false`,
                 fields: 'files(id, name)',
@@ -790,7 +996,6 @@
                 gdriveFileId = response.result.files[0].id;
                 console.log('File trovato su Drive:', gdriveFileId);
             } else {
-                // Crea nuovo file
                 await createDriveFile();
             }
         } catch (error) {
@@ -875,7 +1080,6 @@
             if (response.ok) {
                 const driveData = await response.json();
                 
-                // Merge con dati locali (Drive ha priorità)
                 const localData = loadFromStorage();
                 const mergedData = {...localData, ...driveData};
                 
@@ -984,7 +1188,7 @@
         setTimeout(() => toast.classList.add('show'), 10);
         setTimeout(() => {
             toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
+            setTimeout(() => toast.remove(), 400);
         }, 3000);
     }
 
@@ -1015,7 +1219,7 @@
 
     function sanitizeValue(value) {
         if (typeof value !== 'string') return '';
-        return value.replace(/[<>]/g, '').substring(0, 10);
+        return value.replace(/[<>]/g, '').substring(0, 30);
     }
 
     // ============================================
@@ -1041,7 +1245,6 @@
             localStorage.setItem(STORAGE_KEY, dataStr);
             lastSaveTime = new Date();
             
-            // Sincronizza con Google Drive se abilitato
             if (isGDriveEnabled && accessToken) {
                 uploadToDrive();
             }
@@ -1112,7 +1315,6 @@
         render(); 
         load();
         
-        // Carica Google APIs se configurato
         if (CLIENT_ID && API_KEY) {
             loadGoogleAPIs();
         }
@@ -1169,7 +1371,8 @@
                     data-c="${c}" 
                     inputmode="${c === 'straordinari' ? 'decimal' : 'text'}"
                     oninput="handleInput(this)"
-                    autocomplete="off"></td>`;
+                    autocomplete="off"
+                    maxlength="30"></td>`;
             });
             h += `</tr>`;
         }
@@ -1190,7 +1393,7 @@
                 <input id="res" type="text" readonly>
             </div>
             <div class="pay-row">
-                <span style="color:#0d47a1">💼 Restante anno:</span>
+                <span style="background: linear-gradient(90deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">💼 Restante anno:</span>
                 <input id="ann" type="text" readonly>
             </div>
         </div>`;
