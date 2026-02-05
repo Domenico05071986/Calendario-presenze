@@ -178,36 +178,45 @@
         }
         
         .btn-save { 
-            background: linear-gradient(135deg, #32CD32, #228B22); 
-            color: white;
+            background: linear-gradient(135deg, #2a2520, #1a1a1a); 
+            color: var(--gold);
+            border: 2px solid var(--gold);
         }
         .btn-save:hover { 
-            background: linear-gradient(135deg, #3ee03e, #2ab82a);
-            box-shadow: 0 6px 25px rgba(50,205,50,0.5);
+            background: linear-gradient(135deg, #3a3530, #2a2520);
+            box-shadow: 0 6px 25px var(--shadow-gold);
+            border-color: var(--primary);
         }
         .btn-load { 
-            background: linear-gradient(135deg, #708090, #4F5A65);
-            color: white;
+            background: linear-gradient(135deg, #2a2520, #1a1a1a);
+            color: var(--gold);
+            border: 2px solid var(--gold);
         }
         .btn-load:hover { 
-            background: linear-gradient(135deg, #8A9AA9, #5F6A75);
-            box-shadow: 0 6px 25px rgba(112,128,144,0.5);
+            background: linear-gradient(135deg, #3a3530, #2a2520);
+            box-shadow: 0 6px 25px var(--shadow-gold);
+            border-color: var(--primary);
         }
         .btn-gdrive { 
-            background: linear-gradient(135deg, #4285f4, #3367d6);
-            color: white;
+            background: linear-gradient(135deg, #2a2520, #1a1a1a);
+            color: var(--gold);
+            border: 2px solid var(--gold);
         }
         .btn-gdrive:hover { 
-            background: linear-gradient(135deg, #5a9eff, #4a7fe6);
-            box-shadow: 0 6px 25px rgba(66,133,244,0.5);
+            background: linear-gradient(135deg, #3a3530, #2a2520);
+            box-shadow: 0 6px 25px var(--shadow-gold);
+            border-color: var(--primary);
         }
         .btn-gdrive.syncing { opacity: 0.6; pointer-events: none; }
         .btn-gdrive.connected { 
-            background: linear-gradient(135deg, #34a853, #2d8e47);
+            background: linear-gradient(135deg, #FFD700, #DAA520);
+            color: #000;
+            border: 2px solid #FFA500;
         }
         .btn-gdrive.connected:hover {
-            background: linear-gradient(135deg, #3eb85f, #35a050);
-            box-shadow: 0 6px 25px rgba(52,168,83,0.5);
+            background: linear-gradient(135deg, #FFF8DC, #FFD700);
+            box-shadow: 0 6px 25px var(--shadow-gold);
+            border-color: var(--gold);
         }
 
         /* STATUS INDICATOR */
@@ -720,7 +729,7 @@
 
 <!-- LOGO EURO -->
 <div class="logo-container">
-    <div class="euro-logo">💰</div>
+    <div class="euro-logo">€</div>
     <div class="logo-title">Calendario Presenze</div>
 </div>
 
@@ -1449,7 +1458,7 @@
                 <input id="res" type="text" readonly>
             </div>
             <div class="pay-row">
-                <span style="background: linear-gradient(90deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">💼 Restante anno:</span>
+                <span style="background: linear-gradient(90deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">💰 Progressivo Anno:</span>
                 <input id="ann" type="text" readonly>
             </div>
         </div>`;
@@ -1511,11 +1520,14 @@
         let totA = 0;
         const data = loadFromStorage();
         
+        // Somma PROGRESSIVA: solo i mesi da gennaio fino al mese corrente
         if (data[curYear]) {
-            for (let m = 0; m < 12; m++) {
+            for (let m = 0; m <= curMonth; m++) {
                 if (m === curMonth) { 
+                    // Mese corrente: usa il resto calcolato sopra
                     totA += resto; 
                 } else if (data[curYear][m]) {
+                    // Mesi precedenti: calcola dal localStorage
                     let mTot = 0;
                     const mData = data[curYear][m];
                     
