@@ -1377,6 +1377,62 @@
             h += `</tr>`;
         }
         
+        // ============================================
+        // RIGHE TOTALI MESE
+        // ============================================
+        let totals = {
+            roma: 0,
+            trasferta: 0,
+            straordinari: 0,
+            sabato: 0,
+            domenica: 0,
+            ferie: 0
+        };
+        
+        // Conta i giorni/ore dai dati salvati
+        const data = loadFromStorage();
+        if (data[curYear] && data[curYear][curMonth]) {
+            const mData = data[curYear][curMonth];
+            Object.keys(mData.v).forEach(k => {
+                const [d, c] = k.split('-');
+                const val = mData.v[k];
+                if (val && val.trim() !== '') {
+                    if (c === 'straordinari') {
+                        totals[c] += parseFloat(val.replace(',', '.')) || 0;
+                    } else {
+                        totals[c] += 1;
+                    }
+                }
+            });
+        }
+        
+        // RIGA TOTALI - Titolo
+        h += `<tr style="background: linear-gradient(135deg, #3a3020, #4a4030); border-top: 3px solid var(--gold);">
+            <td colspan="7" style="text-align: center; font-weight: 900; font-size: 16px; padding: 14px; color: var(--gold); text-transform: uppercase; letter-spacing: 2px;">
+                💰 TOTALI MESE
+            </td>
+        </tr>`;
+        
+        // RIGA 1 - Numero giorni/ore
+        h += `<tr data-total-type="numbers" style="background: rgba(255,215,0,0.15); border: 2px solid rgba(255,215,0,0.3);">
+            <td style="background: rgba(255,215,0,0.1);"></td>`;
+        cols.forEach(c => {
+            const count = c === 'straordinari' 
+                ? totals[c].toFixed(1) 
+                : totals[c];
+            h += `<td style="font-weight: 800; font-size: 15px; color: var(--gold);">${count > 0 ? count : '-'}</td>`;
+        });
+        h += `</tr>`;
+        
+        // RIGA 2 - Importi in euro
+        h += `<tr data-total-type="amounts" style="background: rgba(255,215,0,0.1); border: 2px solid rgba(255,215,0,0.3); border-bottom: 3px solid var(--gold);">
+            <td style="background: rgba(255,215,0,0.08);"></td>`;
+        cols.forEach(c => {
+            const amount = totals[c] * RATES[c];
+            h += `<td style="font-weight: 800; font-size: 15px; color: #32CD32;">€${amount > 0 ? amount.toFixed(2) : '-'}</td>`;
+        });
+        h += `</tr>`;
+        
         h += `</tbody></table></div>
         <div class="summary">
             <div class="summary-title">💰 Riepilogo Economico</div>
@@ -1485,6 +1541,55 @@
         }
         
         document.getElementById('ann').value = totA !== 0 ? '€ ' + totA.toFixed(2) : '';
+        
+        // ============================================
+        // AGGIORNA RIGHE TOTALI IN TEMPO REALE
+        // ============================================
+        updateMonthTotals();
+    }
+    
+    function updateMonthTotals() {
+        // Calcola totali dalle caselle visibili (non da localStorage)
+        let totals = {
+            roma: 0,
+            trasferta: 0,
+            straordinari: 0,
+            sabato: 0,
+            domenica: 0,
+            ferie: 0
+        };
+        
+        cols.forEach(c => {
+            document.querySelectorAll(`input[data-c="${c}"]`).forEach(i => {
+                if (i.value && i.value.trim() !== '') {
+                    if (c === 'straordinari') {
+                        totals[c] += parseFloat(i.value.replace(',', '.')) || 0;
+                    } else {
+                        totals[c] += 1;
+                    }
+                }
+            });
+        });
+        
+        // Aggiorna celle dei numeri (prima riga totali)
+        const numberCells = document.querySelectorAll('tr[data-total-type="numbers"] td');
+        if (numberCells.length > 0) {
+            cols.forEach((c, idx) => {
+                const count = c === 'straordinari' 
+                    ? totals[c].toFixed(1) 
+                    : totals[c];
+                numberCells[idx + 1].textContent = count > 0 ? count : '-';
+            });
+        }
+        
+        // Aggiorna celle degli importi (seconda riga totali)
+        const amountCells = document.querySelectorAll('tr[data-total-type="amounts"] td');
+        if (amountCells.length > 0) {
+            cols.forEach((c, idx) => {
+                const amount = totals[c] * RATES[c];
+                amountCells[idx + 1].textContent = amount > 0 ? '€' + amount.toFixed(2) : '-';
+            });
+        }
     }
 
     // ============================================
