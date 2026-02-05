@@ -423,6 +423,11 @@
             box-shadow: 0 0 25px var(--shadow-gold);
         }
         
+        .pay-row input::placeholder {
+            color: rgba(255,215,0,0.3);
+            font-weight: 600;
+        }
+        
         #ann { 
             color: var(--gold);
             background: linear-gradient(135deg, #2a2520, #3a3020);
@@ -1447,19 +1452,19 @@
             <div class="summary-title">💰 Riepilogo Economico</div>
             <div class="pay-row">
                 <span>Totale mese:</span>
-                <input id="totM" type="text" readonly>
+                <input id="totM" type="text" readonly placeholder="€ 0,00">
             </div>
             <div class="pay-row">
                 <span>Acconto:</span>
-                <input id="acc" type="number" inputmode="decimal" oninput="handleAccontoInput()" placeholder="€ 0.00">
+                <input id="acc" type="text" inputmode="decimal" oninput="handleAccontoInput()" onblur="formatAcconto()" placeholder="€ 0,00">
             </div>
             <div class="pay-row">
                 <span>Restante mese:</span>
-                <input id="res" type="text" readonly>
+                <input id="res" type="text" readonly placeholder="€ 0,00">
             </div>
             <div class="pay-row">
                 <span style="background: linear-gradient(90deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">💰 Progressivo Anno:</span>
-                <input id="ann" type="text" readonly>
+                <input id="ann" type="text" readonly placeholder="€ 0,00">
             </div>
         </div>`;
         
@@ -1476,8 +1481,34 @@
     }
 
     function handleAccontoInput() {
+        // Rimuovi tutto tranne numeri, punto e virgola
+        const input = document.getElementById('acc');
+        let value = input.value.replace(/[^\d.,]/g, '');
+        input.value = value;
+        
         calc();
         debouncedAutoSave();
+    }
+    
+    function formatAcconto() {
+        const input = document.getElementById('acc');
+        let value = input.value.replace(/[^\d.,]/g, '');
+        
+        if (value === '' || value === '0') {
+            input.value = '';
+            calc();
+            return;
+        }
+        
+        // Converti in numero
+        const num = parseFloat(value.replace(',', '.'));
+        
+        if (!isNaN(num) && num > 0) {
+            // Formatta con € e .00
+            input.value = '€ ' + num.toFixed(2);
+        }
+        
+        calc();
     }
 
     function debouncedAutoSave() {
@@ -1511,7 +1542,7 @@
             totalMese += (q * RATES[c]);
         });
         
-        const acc = parseFloat(document.getElementById('acc').value) || 0;
+        const acc = parseFloat(document.getElementById('acc').value.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
         const resto = totalMese - acc;
         
         document.getElementById('totM').value = totalMese > 0 ? '€ ' + totalMese.toFixed(2) : '';
@@ -1656,8 +1687,15 @@
             console.log(`📊 Caricati ${loadedCount} valori`);
             
             const accInput = document.getElementById('acc');
-            if (accInput) {
-                accInput.value = mData.a || '';
+            if (accInput && mData.a) {
+                // Rimuovi € e formatta se necessario
+                const accValue = mData.a.toString().replace(/[^\d.,]/g, '');
+                const accNum = parseFloat(accValue.replace(',', '.'));
+                if (!isNaN(accNum) && accNum > 0) {
+                    accInput.value = '€ ' + accNum.toFixed(2);
+                } else {
+                    accInput.value = '';
+                }
             }
         } else {
             console.log('ℹ️ Nessun dato per questo mese');
