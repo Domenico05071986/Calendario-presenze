@@ -858,8 +858,132 @@
     const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
     // ============================================
-    // GOOGLE DRIVE: INIZIALIZZAZIONE
+    // STORAGE MULTIPLO TOKEN (per mobile aggressivi)
     // ============================================
+    function saveTokenMultiple(token, expiry) {
+        try {
+            // Salva in localStorage
+            localStorage.setItem('gdrive_access_token', token);
+            localStorage.setItem('gdrive_token_expiry', expiry.toString());
+            
+            // Salva in sessionStorage (backup)
+            sessionStorage.setItem('gdrive_access_token', token);
+            sessionStorage.setItem('gdrive_token_expiry', expiry.toString());
+            
+            // Salva in IndexedDB (più persistente su mobile)
+            saveTokenToIndexedDB(token, expiry);
+            
+            console.log('✅ Token salvato in 3 storage');
+        } catch (e) {
+            console.error('Errore salvataggio token:', e);
+        }
+    }
+    
+    function saveTokenToIndexedDB(token, expiry) {
+        const request = indexedDB.open('CalendarioPresenze', 1);
+        
+        request.onupgradeneeded = function(e) {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('tokens')) {
+                db.createObjectStore('tokens');
+            }
+        };
+        
+        request.onsuccess = function(e) {
+            const db = e.target.result;
+            const tx = db.transaction('tokens', 'readwrite');
+            const store = tx.objectStore('tokens');
+            store.put({token: token, expiry: expiry}, 'gdrive_token');
+            console.log('✅ Token salvato in IndexedDB');
+        };
+    }
+    
+    function loadTokenFromMultiple(callback) {
+        // Prova 1: localStorage
+        let savedToken = localStorage.getItem('gdrive_access_token');
+        let expiryTime = localStorage.getItem('gdrive_token_expiry');
+        
+        if (!savedToken || !expiryTime) {
+            // Prova 2: sessionStorage
+            savedToken = sessionStorage.getItem('gdrive_access_token');
+            expiryTime = sessionStorage.getItem('gdrive_token_expiry');
+            
+            if (savedToken && expiryTime) {
+                // Ripristina in localStorage
+                localStorage.setItem('gdrive_access_token', savedToken);
+                localStorage.setItem('gdrive_token_expiry', expiryTime);
+                console.log('📦 Token recuperato da sessionStorage');
+            }
+        }
+        
+        if (!savedToken || !expiryTime) {
+            // Prova 3: IndexedDB
+            loadTokenFromIndexedDB(callback);
+            return;
+        }
+        
+        callback(savedToken, expiryTime);
+    }
+    
+    function loadTokenFromIndexedDB(callback) {
+        const request = indexedDB.open('CalendarioPresenze', 1);
+        
+        request.onsuccess = function(e) {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('tokens')) {
+                callback(null, null);
+                return;
+            }
+            
+            const tx = db.transaction('tokens', 'readonly');
+            const store = tx.objectStore('tokens');
+            const getRequest = store.get('gdrive_token');
+            
+            getRequest.onsuccess = function() {
+                if (getRequest.result) {
+                    const token = getRequest.result.token;
+                    const expiry = getRequest.result.expiry;
+                    
+                    // Ripristina in localStorage e sessionStorage
+                    localStorage.setItem('gdrive_access_token', token);
+                    localStorage.setItem('gdrive_token_expiry', expiry.toString());
+                    sessionStorage.setItem('gdrive_access_token', token);
+                    sessionStorage.setItem('gdrive_token_expiry', expiry.toString());
+                    
+                    console.log('📦 Token recuperato da IndexedDB');
+                    callback(token, expiry.toString());
+                } else {
+                    callback(null, null);
+                }
+            };
+            
+            getRequest.onerror = function() {
+                callback(null, null);
+            };
+        };
+        
+        request.onerror = function() {
+            callback(null, null);
+        };
+    }
+    
+    function clearAllTokens() {
+        localStorage.removeItem('gdrive_access_token');
+        localStorage.removeItem('gdrive_token_expiry');
+        sessionStorage.removeItem('gdrive_access_token');
+        sessionStorage.removeItem('gdrive_token_expiry');
+        
+        // Cancella da IndexedDB
+        const request = indexedDB.open('CalendarioPresenze', 1);
+        request.onsuccess = function(e) {
+            const db = e.target.result;
+            if (db.objectStoreNames.contains('tokens')) {
+                const tx = db.transaction('tokens', 'readwrite');
+                const store = tx.objectStore('tokens');
+                store.delete('gdrive_token');
+            }
+        };
+    }
     function loadGoogleAPIs() {
         const gapiScript = document.createElement('script');
         gapiScript.src = 'https://apis.google.com/js/api.js';
@@ -909,43 +1033,42 @@
     }
     
     function restoreSavedToken() {
-        const savedToken = localStorage.getItem('gdrive_access_token');
-        const expiryTime = localStorage.getItem('gdrive_token_expiry');
-        
-        if (savedToken && expiryTime) {
-            const now = new Date().getTime();
-            const expiry = parseInt(expiryTime);
-            
-            if (now < (expiry - 300000)) {
-                accessToken = savedToken;
-                isGDriveEnabled = true;
+    function restoreSavedToken() {
+        loadTokenFromMultiple((savedToken, expiryTime) => {
+            if (savedToken && expiryTime) {
+                const now = new Date().getTime();
+                const expiry = parseInt(expiryTime);
                 
-                gapi.client.setToken({access_token: accessToken});
-                
-                updateGDriveButton(true, true);
-                updateSyncStatus('Connesso', 'success');
-                
-                findOrCreateDriveFile().then(() => {
-                    return downloadFromDrive();
-                }).then(() => {
-                    console.log('✅ Token ripristinato e dati sincronizzati');
-                    updateSyncStatus('Sincronizzato', 'success');
-                }).catch((error) => {
-                    console.error('❌ Errore ripristino:', error);
-                    localStorage.removeItem('gdrive_access_token');
-                    localStorage.removeItem('gdrive_token_expiry');
-                    accessToken = null;
-                    isGDriveEnabled = false;
-                    updateGDriveButton(true, false);
-                    updateSyncStatus('Richiede autenticazione', 'error');
-                    showToast('⚠️ Richiesta nuova autenticazione', 'info');
-                });
-            } else {
-                localStorage.removeItem('gdrive_access_token');
-                localStorage.removeItem('gdrive_token_expiry');
-                console.log('⚠️ Token scaduto');
+                if (now < (expiry - 300000)) {
+                    accessToken = savedToken;
+                    isGDriveEnabled = true;
+                    
+                    gapi.client.setToken({access_token: accessToken});
+                    
+                    updateGDriveButton(true, true);
+                    updateSyncStatus('Connesso', 'success');
+                    
+                    findOrCreateDriveFile().then(() => {
+                        return downloadFromDrive();
+                    }).then(() => {
+                        console.log('✅ Token ripristinato e dati sincronizzati');
+                        updateSyncStatus('Sincronizzato', 'success');
+                    }).catch((error) => {
+                        console.error('❌ Errore ripristino:', error);
+                        clearAllTokens();
+                        accessToken = null;
+                        isGDriveEnabled = false;
+                        updateGDriveButton(true, false);
+                        updateSyncStatus('Richiede autenticazione', 'error');
+                        showToast('⚠️ Richiesta nuova autenticazione', 'info');
+                    });
+                } else {
+                    clearAllTokens();
+                    console.log('⚠️ Token scaduto');
+                }
             }
-        }
+        });
+    }
     }
 
     // ============================================
@@ -961,8 +1084,7 @@
             google.accounts.oauth2.revoke(accessToken, () => {
                 accessToken = null;
                 isGDriveEnabled = false;
-                localStorage.removeItem('gdrive_access_token');
-                localStorage.removeItem('gdrive_token_expiry');
+                clearAllTokens();
                 updateGDriveButton(true, false);
                 updateSyncStatus('Non sincronizzato', 'default');
                 showToast('🔓 Disconnesso da Google Drive', 'info');
@@ -976,9 +1098,9 @@
                 accessToken = resp.access_token;
                 isGDriveEnabled = true;
                 
-                localStorage.setItem('gdrive_access_token', accessToken);
+                // Salva il token in tutti gli storage (localStorage + sessionStorage + IndexedDB)
                 const expiryTime = new Date().getTime() + (resp.expires_in * 1000);
-                localStorage.setItem('gdrive_token_expiry', expiryTime.toString());
+                saveTokenMultiple(accessToken, expiryTime);
                 
                 updateGDriveButton(true, true);
                 showToast('✅ Connesso a Google Drive', 'success');
