@@ -858,7 +858,7 @@
     const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
     // ============================================
-    // STORAGE MULTIPLO TOKEN (per mobile aggressivi)
+    // STORAGE MULTIPLO TOKEN (per browser aggressivi)
     // ============================================
     
     // NUOVO: Salva anche in cookie (dura 1 anno!)
@@ -1032,6 +1032,10 @@
         
         console.log('🗑️ Tutti i token cancellati');
     }
+
+    // ============================================
+    // GOOGLE APIS LOADING
+    // ============================================
     function loadGoogleAPIs() {
         const gapiScript = document.createElement('script');
         gapiScript.src = 'https://apis.google.com/js/api.js';
@@ -1081,7 +1085,6 @@
     }
     
     function restoreSavedToken() {
-    function restoreSavedToken() {
         loadTokenFromMultiple((savedToken, expiryTime) => {
             if (savedToken && expiryTime) {
                 const now = new Date().getTime();
@@ -1117,7 +1120,6 @@
             }
         });
     }
-    }
 
     // ============================================
     // GOOGLE DRIVE: AUTENTICAZIONE
@@ -1146,7 +1148,7 @@
                 accessToken = resp.access_token;
                 isGDriveEnabled = true;
                 
-                // Salva il token in tutti gli storage (localStorage + sessionStorage + IndexedDB)
+                // Salva il token in tutti gli storage (localStorage + sessionStorage + Cookie + IndexedDB)
                 const expiryTime = new Date().getTime() + (resp.expires_in * 1000);
                 saveTokenMultiple(accessToken, expiryTime);
                 
@@ -1355,14 +1357,14 @@
         indicator.className = 'sync-indicator';
         if (state === 'syncing') {
             indicator.classList.add('syncing');
-            textEl.style.color = '#FFA500'; // Arancione durante sync
+            textEl.style.color = '#FFA500';
         } else if (state === 'error') {
             indicator.classList.add('error');
-            textEl.style.color = '#ff6b6b'; // Rosso per errori
+            textEl.style.color = '#ff6b6b';
         } else if (state === 'success') {
-            textEl.style.color = '#32CD32'; // VERDE per sincronizzato
+            textEl.style.color = '#32CD32';
         } else {
-            textEl.style.color = 'var(--gold)'; // Oro di default
+            textEl.style.color = 'var(--gold)';
         }
     }
 
@@ -1579,7 +1581,6 @@
             ferie: 0
         };
         
-        // Conta i giorni/ore dai dati salvati
         const data = loadFromStorage();
         if (data[curYear] && data[curYear][curMonth]) {
             const mData = data[curYear][curMonth];
@@ -1596,14 +1597,12 @@
             });
         }
         
-        // RIGA TOTALI - Titolo
         h += `<tr style="background: linear-gradient(135deg, #3a3020, #4a4030); border-top: 3px solid var(--gold);">
             <td colspan="7" style="text-align: center; font-weight: 900; font-size: 16px; padding: 14px; color: var(--gold); text-transform: uppercase; letter-spacing: 2px;">
                 💰 TOTALI MESE
             </td>
         </tr>`;
         
-        // RIGA 1 - Numero giorni/ore
         h += `<tr data-total-type="numbers" style="background: rgba(255,215,0,0.15); border: 2px solid rgba(255,215,0,0.3);">
             <td style="background: rgba(255,215,0,0.1);"></td>`;
         cols.forEach(c => {
@@ -1614,7 +1613,6 @@
         });
         h += `</tr>`;
         
-        // RIGA 2 - Importi in euro
         h += `<tr data-total-type="amounts" style="background: rgba(255,215,0,0.1); border: 2px solid rgba(255,215,0,0.3); border-bottom: 3px solid var(--gold);">
             <td style="background: rgba(255,215,0,0.08);"></td>`;
         cols.forEach(c => {
@@ -1657,7 +1655,6 @@
     }
 
     function handleAccontoInput() {
-        // Rimuovi tutto tranne numeri, punto e virgola
         const input = document.getElementById('acc');
         let value = input.value.replace(/[^\d.,]/g, '');
         input.value = value;
@@ -1676,11 +1673,9 @@
             return;
         }
         
-        // Converti in numero
         const num = parseFloat(value.replace(',', '.'));
         
         if (!isNaN(num) && num > 0) {
-            // Formatta con € e .00
             input.value = '€ ' + num.toFixed(2);
         }
         
@@ -1727,14 +1722,11 @@
         let totA = 0;
         const data = loadFromStorage();
         
-        // Somma PROGRESSIVA: solo i mesi da gennaio fino al mese corrente
         if (data[curYear]) {
             for (let m = 0; m <= curMonth; m++) {
                 if (m === curMonth) { 
-                    // Mese corrente: usa il resto calcolato sopra
                     totA += resto; 
                 } else if (data[curYear][m]) {
-                    // Mesi precedenti: calcola dal localStorage
                     let mTot = 0;
                     const mData = data[curYear][m];
                     
@@ -1761,14 +1753,10 @@
         
         document.getElementById('ann').value = totA !== 0 ? '€ ' + totA.toFixed(2) : '';
         
-        // ============================================
-        // AGGIORNA RIGHE TOTALI IN TEMPO REALE
-        // ============================================
         updateMonthTotals();
     }
     
     function updateMonthTotals() {
-        // Calcola totali dalle caselle visibili (non da localStorage)
         let totals = {
             roma: 0,
             trasferta: 0,
@@ -1790,7 +1778,6 @@
             });
         });
         
-        // Aggiorna celle dei numeri (prima riga totali)
         const numberCells = document.querySelectorAll('tr[data-total-type="numbers"] td');
         if (numberCells.length > 0) {
             cols.forEach((c, idx) => {
@@ -1801,7 +1788,6 @@
             });
         }
         
-        // Aggiorna celle degli importi (seconda riga totali)
         const amountCells = document.querySelectorAll('tr[data-total-type="amounts"] td');
         if (amountCells.length > 0) {
             cols.forEach((c, idx) => {
@@ -1864,7 +1850,6 @@
             
             const accInput = document.getElementById('acc');
             if (accInput && mData.a) {
-                // Rimuovi € e formatta se necessario
                 const accValue = mData.a.toString().replace(/[^\d.,]/g, '');
                 const accNum = parseFloat(accValue.replace(',', '.'));
                 if (!isNaN(accNum) && accNum > 0) {
