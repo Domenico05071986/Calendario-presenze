@@ -1083,43 +1083,98 @@
             restoreSavedToken();
         }
     }
+    // ============================================
+// 🔧 PATCH: RISOLVE TOKEN SCADUTO DOPO 1 ORA
+// ============================================
+// ISTRUZIONI: Aggiungi questo codice DOPO la funzione restoreSavedToken()
+
+// NUOVA FUNZIONE: Rinnovo Automatico Token Silenzioso
+function renewTokenSilently() {
+    if (!tokenClient) {
+        console.error('❌ tokenClient non inizializzato');
+        clearAllTokens();
+        updateGDriveButton(true, false);
+        updateSyncStatus('Richiede autenticazione', 'error');
+        return;
+    }
     
+    console.log('🔄 Tentativo rinnovo token silenzioso...');
+    
+    tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+            console.error('❌ Rinnovo fallito:', resp.error);
+            // Se rinnovo silenzioso fallisce, cancella e chiedi login
+            clearAllTokens();
+            updateGDriveButton(true, false);
+            updateSyncStatus('Richiede autenticazione', 'error');
+            showToast('⚠️ Richiesta nuova autenticazione', 'info');
+            return;
+        }
+        
+        // Successo! Salva nuovo token
+        accessToken = resp.access_token;
+        isGDriveEnabled = true;
+        
+        const expiryTime = new Date().getTime() + (resp.expires_in * 1000);
+        saveTokenMultiple(accessToken, expiryTime);
+        
+        updateGDriveButton(true, true);
+        updateSyncStatus('Riconnesso automaticamente', 'success');
+        console.log('✅ Token rinnovato automaticamente in modo silenzioso!');
+        showToast('🔄 Connessione rinnovata', 'success');
+        
+        // Scarica dati aggiornati
+        await findOrCreateDriveFile();
+        await downloadFromDrive();
+    };
+    
+    // IMPORTANTE: prompt = '' (stringa vuota) = rinnovo SILENZIOSO senza popup!
+    tokenClient.requestAccessToken({prompt: ''});
+}
+
+// SOSTITUISCI LA FUNZIONE restoreSavedToken CON QUESTA:
     function restoreSavedToken() {
         loadTokenFromMultiple((savedToken, expiryTime) => {
             if (savedToken && expiryTime) {
                 const now = new Date().getTime();
                 const expiry = parseInt(expiryTime);
-                
-                if (now < (expiry - 300000)) {
-                    accessToken = savedToken;
-                    isGDriveEnabled = true;
-                    
-                    gapi.client.setToken({access_token: accessToken});
-                    
-                    updateGDriveButton(true, true);
-                    updateSyncStatus('Connesso', 'success');
-                    
-                    findOrCreateDriveFile().then(() => {
-                        return downloadFromDrive();
-                    }).then(() => {
-                        console.log('✅ Token ripristinato e dati sincronizzati');
-                        updateSyncStatus('Sincronizzato', 'success');
-                    }).catch((error) => {
-                        console.error('❌ Errore ripristino:', error);
-                        clearAllTokens();
-                        accessToken = null;
-                        isGDriveEnabled = false;
-                        updateGDriveButton(true, false);
-                        updateSyncStatus('Richiede autenticazione', 'error');
-                        showToast('⚠️ Richiesta nuova autenticazione', 'info');
-                    });
-                } else {
-                    clearAllTokens();
-                    console.log('⚠️ Token scaduto');
-                }
-            }
-        });
-    }
+            
+								// Controlla se token è ancora valido (margine 5 minuti)
+								if (now < (expiry - 300000)) {
+										// ✅ Token valido, usalo normalmente
+										console.log('✅ Token trovato e valido');
+										accessToken = savedToken;
+										isGDriveEnabled = true;
+										
+										gapi.client.setToken({access_token: accessToken});
+										
+										updateGDriveButton(true, true);
+										updateSyncStatus('Connesso', 'success');
+										
+										findOrCreateDriveFile().then(() => {
+												return downloadFromDrive();
+										}).then(() => {
+												console.log('✅ Token ripristinato e dati sincronizzati');
+												updateSyncStatus('Sincronizzato', 'success');
+										}).catch((error) => {
+												console.error('❌ Errore ripristino:', error);
+												// Invece di cancellare tutto, prova rinnovo silenzioso
+												console.log('🔄 Tentativo rinnovo token dopo errore...');
+												renewTokenSilently();
+										});
+								} else {
+										// ⚠️ Token SCADUTO, ma NON cancellare! Rinnova silenziosamente
+										console.log('⚠️ Token scaduto, avvio rinnovo automatico...');
+										renewTokenSilently();
+								}
+						} else {
+								// Nessun token salvato
+								console.log('ℹ️ Nessun token salvato, autenticazione richiesta');
+						}
+				});
+		}
+
+ 
 
     // ============================================
     // GOOGLE DRIVE: AUTENTICAZIONE
